@@ -18,9 +18,13 @@
     }
 
     h1 {
-      font-size: 28px;
+      font-size: 32px;
       font-weight: bold;
       margin-bottom: 40px;
+      color: white;
+    }
+    p {
+      color: white;
     }
 
     .container {
@@ -37,15 +41,19 @@
       text-align: center;
     }
 
-    .value-label {
+    .cash-label {
       font-size: 100%;
       margin-bottom: 20px;
       color: #ffffff;
+      background: linear-gradient(180deg, #21ff46 0%, #027930 100%);
+      border-radius: 10px;
     }
-    .title-label {
+    .rebirth-label {
       font-size: 100%;
       margin-bottom: 20px;
       color: #ffffff;
+      background: linear-gradient(180deg, #47c5ff 0%, #0066ff 100%);
+      border-radius: 10px;
     }
 
     .value-display {
@@ -53,37 +61,38 @@
       font-weight: bold;
       margin-bottom: 20px;
       color: #ffffff;
+      text-shadow: 0px 0px 3px rgba(255, 255, 255, 0.4);
     }
 
     .action-button {
       font-size: 14px;
       padding: 10px 15px;
       border: none;
-      background-color: #4CAF50;
+      background-color: #272727;
       color: white;
       cursor: pointer;
-      border-radius: 6px;
+      border-radius: 10px;
       writing-mode: horizontal-tb;
     }
 
     .action-button:hover {
-      background-color: #388e3c;
+      background-color: #383838;
     }
   </style>
 </head>
 <body>
-  <div class="title-label"><h1>Incremental Multiplied</h1></div>
+  <h1>Incremental Multiplied</h1>
 
   <div class="container">
-    <div class="value-label">Cash</div>
-    <div class="value-display" id="cashValue">読み込み中...</div>
+    <div class="cash-label">Cash</div>
+    <div class="value-display" id="cashValue">loading</div>
     <button class="action-button" id="addCashBtn">buy</button>
   </div>
 
   <div class="container">
-    <div class="value-label">Rebirth</div>
-    <div class="value-display" id="rebirthValue">読み込み中...</div>
-    <button class="action-button" id="addRebirthBtn">+1</button>
+    <div class="rebirth-label">Rebirth</div>
+    <div class="value-display" id="rebirthValue">loading</div>
+    <button class="action-button" id="addRebirthBtn">buy</button>
   </div>
 
   <script>
@@ -132,13 +141,13 @@
       });
   
     function updateDisplays() {  
-      document.getElementById('cashValue').textContent = '$' + cash.toHyperE();
+      document.getElementById('cashValue').textContent = cash.toHyperE();
       document.getElementById('rebirthValue').textContent = rebirth.toHyperE();
 
       if (cash.gte(new ExpantaNum([303,1]))) {
         document.getElementById('addRebirthBtn').textContent = '+1';
       } else {
-        document.getElementById('addRebirthBtn').textContent = 'Reach 1e+303 Cash';
+        document.getElementById('addRebirthBtn').textContent = 'Reach E303 Cash';
       }
 
     }
@@ -150,7 +159,7 @@
     }
   
     document.getElementById('addCashBtn').addEventListener('click', function () {
-      let val = cash.mul(new ExpantaNum(2)).add(rebirth)
+      let val = cash.mul(new ExpantaNum(2)).add(rebirth).add(new ExpantaNum(1))
       cash = cash.add(val);
       updateDisplays();
       bounceButton(this);
@@ -167,6 +176,8 @@
       saveToLocalStorage();
     });
   </script>
+  <p>Made by: @kai_ojwisj</p>
   
+  <p>This game sucks don't play it</p>
 </body>
 </html>
