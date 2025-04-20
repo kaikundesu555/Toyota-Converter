@@ -2,85 +2,162 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Cashの表示と追加</title>
+  <title>Incremental Multiplied</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+  <script type="module" src="ExpantaNum.js"></script>
   <style>
     body {
-      font-family: 'Yu Mincho', 'Hiragino Mincho ProN', serif;
-      writing-mode: vertical-rl; /* 縦書き */
-      background-color: #f9f9f9;
-      padding: 40px;
+      font-family: 'Roboto Mono', monospace;
+      background-color: #272727;
+      margin: 0;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-    }
-
-    .container {
-      background-color: #ffffff;
-      border: 1px solid #ddd;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      text-align: center;
+      flex-direction: column;
     }
 
     h1 {
-      font-size: 20px;
-      margin-bottom: 30px;
-    }
-
-    #cashValue {
-      font-size: 24px;
-      margin-bottom: 30px;
+      font-size: 28px;
       font-weight: bold;
-      color: #333;
+      margin-bottom: 40px;
     }
 
-    #addCashBtn {
-      font-size: 16px;
-      padding: 10px 20px;
+    .container {
+      background-color: #181818;
+      border: 1px solid #000000;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+      width: 85%;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: middle;
+      text-align: center;
+    }
+
+    .value-label {
+      font-size: 100%;
+      margin-bottom: 20px;
+      color: #ffffff;
+    }
+    .title-label {
+      font-size: 100%;
+      margin-bottom: 20px;
+      color: #ffffff;
+    }
+
+    .value-display {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #ffffff;
+    }
+
+    .action-button {
+      font-size: 14px;
+      padding: 10px 15px;
       border: none;
       background-color: #4CAF50;
       color: white;
       cursor: pointer;
-      border-radius: 8px;
-      writing-mode: horizontal-tb; /* ボタン内は横書きに */
+      border-radius: 6px;
+      writing-mode: horizontal-tb;
     }
 
-    #addCashBtn:hover {
-      background-color: #45a049;
+    .action-button:hover {
+      background-color: #388e3c;
     }
   </style>
 </head>
 <body>
+  <div class="title-label"><h1>Incremental Multiplied</h1></div>
+
   <div class="container">
-    <h1>現在のCash残高:</h1>
-    <p id="cashValue">読み込み中...</p>
-    <button id="addCashBtn">Cashを追加（+1000円）</button>
+    <div class="value-label">Cash</div>
+    <div class="value-display" id="cashValue">読み込み中...</div>
+    <button class="action-button" id="addCashBtn">+1000円</button>
   </div>
 
-  <script>
-    let cash = 0;
+  <div class="container">
+    <div class="value-label">Rebirth</div>
+    <div class="value-display" id="rebirthValue">読み込み中...</div>
+    <button class="action-button" id="addRebirthBtn">+1</button>
+  </div>
 
+  <script type="module">
+    import { ExpantaNum } from './ExpantaNum.js';
+  
+    let cash = new ExpantaNum(0);
+    let rebirth = new ExpantaNum(0);
+  
+    // 保存されているデータの読み込み
+    function loadFromLocalStorage() {
+      const saved = localStorage.getItem('gameSave');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          cash = new ExpantaNum(data.Cash || 0);
+          rebirth = new ExpantaNum(data.Rebirth || 0);
+        } catch (e) {
+          console.error('保存データの読み込みエラー:', e);
+        }
+      }
+    }
+  
+    // データ保存
+    function saveToLocalStorage() {
+      const data = {
+        Cash: cash.toString(),
+        Rebirth: rebirth.toString()
+      };
+      localStorage.setItem('gameSave', JSON.stringify(data));
+    }
+  
+    // JSONファイルがあれば読み込み → なければ保存済みの値
     fetch('data.json')
       .then(response => response.json())
       .then(data => {
-        cash = data.Cash;
-        updateCashDisplay();
+        if (!localStorage.getItem('gameSave')) {
+          cash = new ExpantaNum(data.Cash || 0);
+          rebirth = new ExpantaNum(data.Rebirth || 0);
+        } else {
+          loadFromLocalStorage();
+        }
+        updateDisplays();
       })
       .catch(error => {
-        document.getElementById('cashValue').textContent = 'エラーが発生しました';
-        console.error('JSON読み込みエラー:', error);
+        console.warn('data.jsonの読み込み失敗。保存データを使用します。');
+        loadFromLocalStorage();
+        updateDisplays();
       });
-
-    function updateCashDisplay() {
-      document.getElementById('cashValue').textContent = cash + ' 円';
+  
+    function updateDisplays() {
+      document.getElementById('cashValue').textContent = '$' + cash.format();
+      document.getElementById('rebirthValue').textContent = rebirth.format();
     }
-
-    document.getElementById('addCashBtn').addEventListener('click', () => {
-      cash += 1000;
-      updateCashDisplay();
+  
+    function bounceButton(button) {
+      button.classList.remove('bouncing');
+      void button.offsetWidth;
+      button.classList.add('bouncing');
+    }
+  
+    document.getElementById('addCashBtn').addEventListener('click', function () {
+      cash = cash.add(new ExpantaNum(1000));
+      updateDisplays();
+      bounceButton(this);
+      saveToLocalStorage();
+    });
+  
+    document.getElementById('addRebirthBtn').addEventListener('click', function () {
+      rebirth = rebirth.add(new ExpantaNum(1));
+      updateDisplays();
+      bounceButton(this);
+      saveToLocalStorage();
     });
   </script>
+  
 </body>
 </html>
