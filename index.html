@@ -1,55 +1,23 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>シンプルなHTMLページ</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        header {
-            background-color: #333;
-            color: white;
-            padding: 10px 0;
-            text-align: center;
-        }
-        main {
-            padding: 20px;
-        }
-        footer {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 10px 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Cashの表示</title>
 </head>
 <body>
+  <h1>現在のCash残高:</h1>
+  <p id="cashValue">読み込み中...</p>
 
-    <header>
-        <h1>Incremental Multiplied</h1>
-    </header>
-
-    <main>
-        <h2>ページの内容</h2>
-        <p>これはシンプルなHTMLの例です。HTMLの基本構造を学ぶためのページです。</p>
-        <ul>
-            <li>HTMLはウェブページの基盤となります。</li>
-            <li>CSSでデザインを整えます。</li>
-            <li>JavaScriptで動的な機能を追加できます。</li>
-        </ul>
-    </main>
-
-    <footer>
-        <p>&copy; 2025 シンプルHTMLページ</p>
-    </footer>
-
+  <script>
+    fetch('data.json')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('cashValue').textContent = data.Cash + ' 円';
+      })
+      .catch(error => {
+        document.getElementById('cashValue').textContent = 'エラーが発生しました';
+        console.error('JSON読み込みエラー:', error);
+      });
+  </script>
 </body>
 </html>
