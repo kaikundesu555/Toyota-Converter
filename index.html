@@ -159,8 +159,7 @@
     }
   
     document.getElementById('addCashBtn').addEventListener('click', function () {
-      let val = cash.mul(new ExpantaNum(2)).add(rebirth).add(new ExpantaNum(1))
-      cash = cash.add(val);
+      cash = cash.mul(new ExpantaNum(2)).add(rebirth).add(new ExpantaNum(1));
       updateDisplays();
       bounceButton(this);
       saveToLocalStorage();
