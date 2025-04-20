@@ -1846,6 +1846,73 @@
     return this;
   }
 
+  P.toShort = function () {
+    const man = this.array[0][0]; // 仮数部
+    let exp = this.array[0][1];   // 指数部
+  
+    if (!Number.isFinite(exp) || !Number.isFinite(man)) {
+      if (this.sign < 0) return "-Infinity";
+      else return "Infinity";
+    }
+    if (this.sign === 0) return "0";
+  
+    if (this.layer > 1 || this.array.length > 1) {
+      return this.toString(); // 簡易表記できないほど大きい
+    }
+  
+    // 1未満の値
+    if (exp === 0) {
+      return (this.sign * man).toFixed(2);
+    }
+  
+    const FirstOnes = ["", "U", "D", "T", "Qd", "Qn", "Sx", "Sp", "Oc", "No"];
+    const SecondOnes = ["", "De", "Vt", "Tg", "qg", "Qg", "sg", "Sg", "Og", "Ng"];
+    const ThirdOnes = ["", "Ce", "Du", "Tr", "Qa", "Qi", "Se", "Si", "Ot", "Ni"];
+    const MultOnes = ["", "Mi", "Mc", "Na", "Pi", "Fm", "At", "Zp", "Yc", "Xo", "Ve", "Me", "Due", "Tre", "Te", "Pt", "He", "Hp", "Oct", "En", "Ic", "Mei", "Dui", "Tri", "Teti", "Pti", "Hei", "Hp", "Oci", "Eni", "Tra", "TeC", "MTc", "DTc", "TrTc", "TeTc", "PeTc", "HTc", "HpT", "OcT", "EnT", "TetC", "MTetc", "DTetc", "TrTetc", "TeTetc", "PeTetc", "HTetc", "HpTetc", "OcTetc", "EnTetc", "PcT", "MPcT", "DPcT", "TPCt", "TePCt", "PePCt", "HePCt", "HpPct", "OcPct", "EnPct", "HCt", "MHcT", "DHcT", "THCt", "TeHCt", "PeHCt", "HeHCt", "HpHct", "OcHct", "EnHct", "HpCt", "MHpcT", "DHpcT", "THpCt", "TeHpCt", "PeHpCt", "HeHpCt", "HpHpct", "OcHpct", "EnHpct", "OCt", "MOcT", "DOcT", "TOCt", "TeOCt", "PeOCt", "HeOCt", "HpOct", "OcOct", "EnOct", "Ent", "MEnT", "DEnT", "TEnt", "TeEnt", "PeEnt", "HeEnt", "HpEnt", "OcEnt", "EnEnt", "Hect", "MeHect"];
+  
+    // 3進数的ロジック：expの桁を数える
+    let leftover = exp % 3;
+    let scaledMan = ExpantaNum.pow(10, leftover).times(man);
+    let num = scaledMan.toNumber();
+    num = Math.floor(num * 100 + 0.00001) / 100;
+  
+    let tier = Math.floor(exp / 3);
+    let suffix = "";
+  
+    if (tier === 1) suffix = "k";
+    else if (tier === 2) suffix = "M";
+    else if (tier === 3) suffix = "B";
+    else if (tier < 1000) {
+      let ones = tier % 10;
+      let tens = Math.floor(tier / 10) % 10;
+      let hundreds = Math.floor(tier / 100);
+      suffix += FirstOnes[ones] + SecondOnes[tens] + ThirdOnes[hundreds];
+    } else {
+      // 第N順
+      let parts = [];
+      let base = 1000;
+      while (tier > 0) {
+        parts.push(tier % base);
+        tier = Math.floor(tier / base);
+      }
+      parts.reverse();
+      for (let i = 0; i < parts.length; i++) {
+        let n = parts[i];
+        let ones = n % 10;
+        let tens = Math.floor(n / 10) % 10;
+        let hundreds = Math.floor(n / 100);
+        suffix += FirstOnes[ones] + SecondOnes[tens] + ThirdOnes[hundreds];
+        if (i < parts.length - 1) {
+          suffix += MultOnes[i + 1];
+        }
+      }
+    }
+  
+    return (this.sign < 0 ? "-" : "") + num + suffix;
+  };
+  
+  
+
 
   // Create and configure initial ExpantaNum constructor.
   ExpantaNum=clone(ExpantaNum);

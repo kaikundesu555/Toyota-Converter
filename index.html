@@ -77,7 +77,7 @@
   <div class="container">
     <div class="value-label">Cash</div>
     <div class="value-display" id="cashValue">読み込み中...</div>
-    <button class="action-button" id="addCashBtn">+1000円</button>
+    <button class="action-button" id="addCashBtn">buy</button>
   </div>
 
   <div class="container">
@@ -131,9 +131,16 @@
         updateDisplays();
       });
   
-    function updateDisplays() {
-      document.getElementById('cashValue').textContent = '$' + cash.format();
-      document.getElementById('rebirthValue').textContent = rebirth.format();
+    function updateDisplays() {  
+      document.getElementById('cashValue').textContent = '$' + cash.toHyperE();
+      document.getElementById('rebirthValue').textContent = rebirth.toHyperE();
+
+      if (cash.gte(new ExpantaNum([303,1]))) {
+        document.getElementById('addRebirthBtn').textContent = '+1';
+      } else {
+        document.getElementById('addRebirthBtn').textContent = 'Reach 1e+303 Cash';
+      }
+
     }
   
     function bounceButton(button) {
@@ -143,14 +150,18 @@
     }
   
     document.getElementById('addCashBtn').addEventListener('click', function () {
-      cash = cash.add(new ExpantaNum(1000));
+      let val = cash.mul(new ExpantaNum(2)).add(rebirth)
+      cash = cash.add(val);
       updateDisplays();
       bounceButton(this);
       saveToLocalStorage();
     });
   
     document.getElementById('addRebirthBtn').addEventListener('click', function () {
-      rebirth = rebirth.add(new ExpantaNum(1));
+      if (cash.gte(new ExpantaNum([303,1]))) {
+        rebirth = rebirth.add(new ExpantaNum(1));
+        cash = new ExpantaNum(0)
+      }
       updateDisplays();
       bounceButton(this);
       saveToLocalStorage();
