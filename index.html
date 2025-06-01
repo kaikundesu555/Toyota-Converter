@@ -93,10 +93,10 @@
 
   <div class="container">
     <h2>Toyota語変換ツール</h2>
-    <p>※スペースや変換形式にご注意ください</p>
+    <p>※スペースや変換形式にご注意ください。日本語の翻訳の精度が悪いです。ご了承ください。</p>
 
     <label for="inputText">入力文字列:</label><br>
-    <input type="text" id="inputText" placeholder="例: こんにちは または toto toyo tata"><br>
+    <input type="text" id="inputText" placeholder="例: こんにちは , toto toyo tata"><br>
 
     <button onclick="convertToToyota()">ローマ字/日本語 → Toyota語</button>
     <button onclick="convertFromToyota()">Toyota語 → ローマ字/日本語</button><br><br>
@@ -205,7 +205,7 @@
       }
 
       const finalResult = wanakana.toKana(result.replace(/\s+/g, ""));
-      document.getElementById("outputText").value = finalResult;
+      document.getElementById("outputText").value = finalResult + " (" +result.replace(/\s+/g, "") + ")";
       updateHistory(input, finalResult);
     }
 
