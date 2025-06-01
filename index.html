@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>TOYOTA💀</title>
+  <script src="https://unpkg.com/wanakana"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #e0f7fa, #e1bee7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      max-width: 600px;
+      width: 95%;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      color: #6a1b9a;
+    }
+
+    p {
+      font-size: 0.9em;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1em;
+    }
+
+    button {
+      padding: 10px 16px;
+      margin: 5px;
+      background-color: #7e57c2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #5e35b1;
+    }
+
+    .history {
+      margin-top: 20px;
+      text-align: left;
+      font-size: 0.9em;
+      max-height: 200px;
+      overflow-y: auto;
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .history-entry {
+      cursor: pointer;
+      padding: 5px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .history-entry:hover {
+      background-color: #e0e0e0;
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 0.8em;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Toyota語変換ツール</h2>
+    <p>※スペースや変換形式にご注意ください</p>
+
+    <label for="inputText">入力文字列:</label><br>
+    <input type="text" id="inputText" placeholder="例: こんにちは または toto toyo tata"><br>
+
+    <button onclick="convertToToyota()">ローマ字/日本語 → Toyota語</button>
+    <button onclick="convertFromToyota()">Toyota語 → ローマ字/日本語</button><br><br>
+
+    <label for="outputText">変換後の文字列:</label><br>
+    <input type="text" id="outputText" readonly><br>
+    <button onclick="copyToClipboard()">コピー</button>
+
+    <div class="history" id="history">
+      <strong>履歴:</strong>
+      <div id="historyList"></div>
+    </div>
+
+    <div class="footer">制作: kai_ojwisj (ChatGPT神!!!)</div>
+  </div>
+
+  <script>
+    const toAlpha = {
+      "to": "a",    "yo": "b",    "ta": "c",
+      "toto": "d",  "toyo": "e",  "tota": "f",
+      "yoto": "g",  "yoyo": "h",  "yota": "i",
+      "tato": "j",  "tayo": "k",  "tata": "l",
+      "tototo": "m","totoyo": "n","totota": "o",
+      "toyoto": "p","toyoyo": "q","toyota": "r",
+      "totato": "s","totayo": "t","totata": "u",
+      "yototo": "v","yotoyo": "w","yotota": "x",
+      "yoyoto": "y","yoyoyo": "z","yoyota": " "
+    };
+
+    const toCode = {};
+    for (const [key, value] of Object.entries(toAlpha)) {
+      toCode[value] = key;
+    }
+
+    const sortedKeys = Object.keys(toAlpha).sort((a, b) => b.length - a.length);
+    const historyLimit = 10;
+    let history = [];
+
+    function updateHistory(input, output) {
+      const entry = { input, output };
+      history.unshift(entry);
+      if (history.length > historyLimit) history.pop();
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const historyList = document.getElementById("historyList");
+      historyList.innerHTML = "";
+      history.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "history-entry";
+        div.textContent = `${item.input} → ${item.output}`;
+        div.onclick = () => {
+          document.getElementById("inputText").value = item.input;
+          document.getElementById("outputText").value = item.output;
+        };
+        historyList.appendChild(div);
+      });
+    }
+
+    function convertToToyota() {
+      const input = document.getElementById("inputText").value.trim();
+      let romaji = "";
+
+      if (wanakana.isJapanese(input)) {
+        romaji = wanakana.toRomaji(input);
+      } else {
+        romaji = input.toLowerCase();
+      }
+
+      let output = "";
+      for (let char of romaji) {
+        const code = toCode[char];
+        output += code !== undefined ? code + " " : char;
+      }
+
+      const result = output.trim();
+      document.getElementById("outputText").value = result;
+      updateHistory(input, result);
+    }
+
+    function convertFromToyota() {
+      const input = document.getElementById("inputText").value.trim();
+      const segments = input.split(" ");
+      let result = "";
+
+      for (let segment of segments) {
+        let temp = segment;
+        let outputSegment = "";
+        while (temp.length > 0) {
+          let matched = false;
+          for (let key of sortedKeys) {
+            if (temp.startsWith(key)) {
+              outputSegment += toAlpha[key];
+              temp = temp.slice(key.length);
+              matched = true;
+              break;
+            }
+          }
+          if (!matched) {
+            outputSegment += temp[0];
+            temp = temp.slice(1);
+          }
+        }
+        result += outputSegment + " ";
+      }
+
+      const finalResult = wanakana.toKana(result.replace(/\s+/g, ""));
+      document.getElementById("outputText").value = finalResult;
+      updateHistory(input, finalResult);
+    }
+
+    function copyToClipboard() {
+      const output = document.getElementById("outputText");
+      output.select();
+      output.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+
+      const button = event.target;
+      const originalText = button.innerText;
+      button.innerText = "コピーしました！";
+      setTimeout(() => {
+        button.innerText = originalText;
+      }, 1500);
+    }
+  </script>
+
+</body>
+</html>
+
