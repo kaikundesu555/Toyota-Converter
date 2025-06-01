@@ -2,7 +2,8 @@
 文字どおりtoyota語に変換するだけのツールです。やったぜ
 うおおおおおおお作った
 
-Link: 
+Link: https://kaikundesu555.github.io/Toyota-Converter/
+Toyota語考案者: nettaigyojin (多分)
 
 # 対応表
 to a
