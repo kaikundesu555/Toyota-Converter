@@ -2,181 +2,169 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Incremental Multiplied</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
-  <script src="./ExpantaNum.js"></script>
+  <title>文字列変換ツール（双方向+スペース対応）</title>
   <style>
     body {
-      font-family: 'Roboto Mono', monospace;
-      background-color: #272727;
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      height: 100vh;
+      padding: 0;
+      background: linear-gradient(to right, #e0f7fa, #e1bee7);
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
-    }
-
-    h1 {
-      font-size: 32px;
-      font-weight: bold;
-      margin-bottom: 40px;
-      color: white;
-    }
-    p {
-      color: white;
+      min-height: 100vh;
     }
 
     .container {
-      background-color: #181818;
-      border: 1px solid #000000;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
-      width: 85%;
-      margin-bottom: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: middle;
+      background: white;
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
       text-align: center;
+      max-width: 500px;
+      width: 90%;
     }
 
-    .cash-label {
-      font-size: 100%;
-      margin-bottom: 20px;
-      color: #ffffff;
-      background: linear-gradient(180deg, #21ff46 0%, #027930 100%);
-      border-radius: 10px;
-    }
-    .rebirth-label {
-      font-size: 100%;
-      margin-bottom: 20px;
-      color: #ffffff;
-      background: linear-gradient(180deg, #47c5ff 0%, #0066ff 100%);
-      border-radius: 10px;
+    h2 {
+      margin-bottom: 10px;
+      color: #6a1b9a;
     }
 
-    .value-display {
-      font-size: 24px;
-      font-weight: bold;
+    p {
+      font-size: 0.9em;
+      color: #555;
       margin-bottom: 20px;
-      color: #ffffff;
-      text-shadow: 0px 0px 3px rgba(255, 255, 255, 0.4);
     }
 
-    .action-button {
-      font-size: 14px;
-      padding: 10px 15px;
-      border: none;
-      background-color: #272727;
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1em;
+    }
+
+    button {
+      padding: 10px 50px;
+      margin: 5px;
+      background-color: #7e57c2;
       color: white;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
-      border-radius: 10px;
-      writing-mode: horizontal-tb;
+      transition: background-color 0.3s ease;
     }
 
-    .action-button:hover {
-      background-color: #383838;
+    button:hover {
+      background-color: #5e35b1;
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 0.8em;
+      color: #888;
     }
   </style>
 </head>
 <body>
-  <h1>Incremental Multiplied</h1>
 
   <div class="container">
-    <div class="cash-label">Cash</div>
-    <div class="value-display" id="cashValue">loading</div>
-    <button class="action-button" id="addCashBtn">buy</button>
-  </div>
+    <h2>Toyota語変換ツール</h2>
+    <p>※ローマ字に変換する際にスペースを入れずに出力してしまうと正しく変換されない恐れがあります</p>
 
-  <div class="container">
-    <div class="rebirth-label">Rebirth</div>
-    <div class="value-display" id="rebirthValue">loading</div>
-    <button class="action-button" id="addRebirthBtn">buy</button>
+    <label for="inputText">入力文字列:</label><br>
+    <input type="text" id="inputText" placeholder="例: toto toyo tata"><br>
+
+    <button onclick="convertToAlphabet()">ローマ字に変換</button>
+    <button onclick="convertToEncoded()">Toyota語に変換</button><br><br>
+
+    <label for="outputText">変換後の文字列:</label><br>
+    <input type="text" id="outputText" readonly><br>
+    <button onclick="copyToClipboard()">コピー</button>
+
+    <div class="footer">制作: kai_ojwisj (ChatGPTに感謝)</div>
   </div>
 
   <script>
-    let cash = new ExpantaNum(0);
-    let rebirth = new ExpantaNum(0);
-  
-    // 保存されているデータの読み込み
-    function loadFromLocalStorage() {
-      const saved = localStorage.getItem('gameSave');
-      if (saved) {
-        try {
-          const data = JSON.parse(saved);
-          cash = new ExpantaNum(data.Cash || 0);
-          rebirth = new ExpantaNum(data.Rebirth || 0);
-        } catch (e) {
-          console.error('保存データの読み込みエラー:', e);
+    const toAlpha = {
+      "to": "a",    "yo": "b",    "ta": "c",
+      "toto": "d",  "toyo": "e",  "tota": "f",
+      "yoto": "g",  "yoyo": "h",  "yota": "i",
+      "tato": "j",  "tayo": "k",  "tata": "l",
+      "tototo": "m","totoyo": "n","totota": "o",
+      "toyoto": "p","toyoyo": "q","toyota": "r",
+      "totato": "s","totayo": "t","totata": "u",
+      "yototo": "v","yotoyo": "w","yotota": "x",
+      "yoyoto": "y","yoyoyo": "z","yoyota": " "
+    };
+
+    const toCode = {};
+    for (const [key, value] of Object.entries(toAlpha)) {
+      toCode[value] = key;
+    }
+
+    const sortedKeys = Object.keys(toAlpha).sort((a, b) => b.length - a.length);
+
+    function convertToAlphabet() {
+      const input = document.getElementById("inputText").value;
+      const segments = input.trim().split(" ");
+      const result = [];
+
+      for (let segment of segments) {
+        let temp = segment;
+        let outputSegment = "";
+        while (temp.length > 0) {
+          let matched = false;
+          for (let key of sortedKeys) {
+            if (temp.startsWith(key)) {
+              outputSegment += toAlpha[key];
+              temp = temp.slice(key.length);
+              matched = true;
+              break;
+            }
+          }
+          if (!matched) {
+            outputSegment += temp[0];
+            temp = temp.slice(1);
+          }
         }
+        result.push(outputSegment);
       }
+
+      document.getElementById("outputText").value = result.join(" ");
     }
-  
-    // データ保存
-    function saveToLocalStorage() {
-      const data = {
-        Cash: cash.toString(),
-        Rebirth: rebirth.toString()
-      };
-      localStorage.setItem('gameSave', JSON.stringify(data));
-    }
-  
-    // JSONファイルがあれば読み込み → なければ保存済みの値
-    fetch('data.json')
-      .then(response => response.json())
-      .then(data => {
-        if (!localStorage.getItem('gameSave')) {
-          cash = new ExpantaNum(data.Cash || 0);
-          rebirth = new ExpantaNum(data.Rebirth || 0);
+
+    function convertToEncoded() {
+      const input = document.getElementById("inputText").value;
+      let output = "";
+
+      for (let char of input) {
+        const code = toCode[char.toLowerCase()];
+        if (code !== undefined) {
+          output += code + " ";
         } else {
-          loadFromLocalStorage();
+          output += char;
         }
-        updateDisplays();
-      })
-      .catch(error => {
-        console.warn('data.jsonの読み込み失敗。保存データを使用します。');
-        loadFromLocalStorage();
-        updateDisplays();
-      });
-  
-    function updateDisplays() {  
-      document.getElementById('cashValue').textContent = cash.toHyperE();
-      document.getElementById('rebirthValue').textContent = rebirth.toHyperE();
-
-      if (cash.gte(new ExpantaNum([303,1]))) {
-        document.getElementById('addRebirthBtn').textContent = '+1';
-      } else {
-        document.getElementById('addRebirthBtn').textContent = 'Reach E303 Cash';
       }
 
+      document.getElementById("outputText").value = output.trim();
     }
-  
-    function bounceButton(button) {
-      button.classList.remove('bouncing');
-      void button.offsetWidth;
-      button.classList.add('bouncing');
+
+    function copyToClipboard() {
+      const output = document.getElementById("outputText");
+      output.select();
+      output.setSelectionRange(0, 99999); // モバイル対応
+      document.execCommand("copy");
+
+      const button = event.target;
+      const originalText = button.innerText;
+      button.innerText = "コピーしました！";
+      setTimeout(() => {
+        button.innerText = originalText;
+      }, 1500);
     }
-  
-    document.getElementById('addCashBtn').addEventListener('click', function () {
-      cash = cash.mul(new ExpantaNum(2)).add(rebirth).add(new ExpantaNum(1));
-      updateDisplays();
-      bounceButton(this);
-      saveToLocalStorage();
-    });
-  
-    document.getElementById('addRebirthBtn').addEventListener('click', function () {
-      if (cash.gte(new ExpantaNum([303,1]))) {
-        rebirth = rebirth.add(new ExpantaNum(1));
-        cash = new ExpantaNum(0)
-      }
-      updateDisplays();
-      bounceButton(this);
-      saveToLocalStorage();
-    });
   </script>
-  <p>Made by: @kai_ojwisj</p>
-  
-  <p>This game sucks don't play it</p>
+
 </body>
 </html>
